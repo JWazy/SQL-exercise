@@ -1,8 +1,9 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
+var path = require('path');
 var pgp = require('pg-promise')();
-var db = pgp('postgres://localhost:5432/generator');
+var db = pgp('gres://ubuntu:sqltest@localhost');
 
 // this is to serve the css and js from the public folder to your app
 // it's a little magical, but essentially you put files in there and link
@@ -14,6 +15,8 @@ app.set('view engine', 'ejs');
 
 // setting your view folder
 app.set('views', __dirname+'/views');
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -34,9 +37,9 @@ app.use( function( req, res, next ) {
 
 // gettting all the users
 app.get('/', function(req,res,next){
-  db.any('SELECT * FROM users')
+  db.any('SELECT * FROM posts ORDER BY id ASC;')
     .then(function(data){
-      return res.render('index', {data: data})
+      return res.render('pages/index', {data: data});
     })
     .catch(function(err){
       return next(err);
@@ -44,20 +47,31 @@ app.get('/', function(req,res,next){
 });
 
 // edit users
-app.get('/users/:id/edit', function(req,res,next){
+app.get('/posts/:id/edit', function(req,res,next){
   var id = parseInt(req.params.id);
-  db.one('select * from users where id = $1', id)
-    .then(function (user) {
-      res.render('edit', {user: user})
+  db.one('SELECT * FROM posts where id = $1', id)
+    .then(function (title) {
+      res.render('pages/edit', {title: title})
     })
     .catch(function (err) {
       return next(err);
     });
 });
 
-app.post('/users/:id/edit', function(req,res,next){
-  db.none('update users set name=$1, email=$2, password=$3 where id=$4',
-    [req.body.name, req.body.email, req.body.password, parseInt(req.params.id)])
+app.get('/post/:id', function(req,res,next){
+  var id = parseInt(req.params.id);
+  db.one('SELECT * FROM posts WHERE id = $1', id)
+    .then(function (title) {
+      res.render('pages/post', {title: title})
+    })
+    .catch(function (err) {
+      return next(err);
+    });
+});
+
+app.post('/posts/:id/edit', function(req,res,next){
+  db.none('update posts set title=$1, entry=$2 where id=$3',
+    [req.body.title, req.body.entry, parseInt(req.params.id)])
     .then(function () {
       res.redirect('/');
     })
@@ -66,9 +80,20 @@ app.post('/users/:id/edit', function(req,res,next){
     });
 });
 
-app.delete('/users/:id', function(req, res, next){
+app.post('/posts/create', function(req,res,next){
+  db.none('INSERT INTO posts(title, entry) VALUES($1, $2)',
+    [req.body.title, req.body.entry])
+    .then(function () {
+      res.redirect('/');
+    })
+    .catch(function (err) {
+      return next(err);
+    });
+});
+
+app.delete('/posts/:id', function(req, res, next){
   var id = parseInt(req.params.id);
-  db.result('delete from users where id = $1', id)
+  db.result('DELETE FROM posts WHERE id = $1', id)
     .then(function (result) {
       res.redirect('/');
     })
@@ -77,6 +102,6 @@ app.delete('/users/:id', function(req, res, next){
     });
 });
 
-app.listen(3000, function(){
-  console.log('Application running on localhost on port 3000');
+app.listen(8080, function(){
+  console.log('Application running on localhost on port 8080');
 });

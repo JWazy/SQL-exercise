@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% include ../partials/head %>
+    <title>Blog - Edit</title>
+  </head>
+  <body>
+    <header>
+      <% include ../partials/header %>
+  </header>
+  <div class="container">
+    <div  class="search-wrapper">
+      <div class="new-entry">
+        <form id="new-entry-form" method="post" action="/posts/<%= title.id %>/edit">
+          <div class="entry-title">
+            <input type="text" placeholder="Title" name="title" value="<%= title.title %>">
+          </div>
+          <div class="entry">
+            <textarea form="new-entry-form" rows="9" cols="61" placeholder="Blog entry..." name="entry"><%= title.entry %></textarea>
+          </div>
+          <input type="submit" id="custom-button" value="Save Edits!">
+        </form>
+        <a href="/" class="custom-button2">Back</a>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <% include ../partials/footer %>
+  </footer>
+  </body>
+</html>

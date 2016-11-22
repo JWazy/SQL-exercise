@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% include ../partials/head %>
+    <title>Blog</title>
+  </head>
+  <body>
+    <header>
+      <% include ../partials/header %>
+  </header>
+  <div class="container">
+    <div  class="search-wrapper">
+      <div class="new-entry">
+        <form id="new-entry-form" method="post" action="/posts/create">
+          <div class="entry-title">
+            <input type="text" placeholder="Title" name="title">
+          </div>
+          <div class="entry">
+            <textarea form="new-entry-form" rows="9" cols="61" placeholder="Blog entry..." name="entry"></textarea>
+          </div>
+          <input type="submit" id="custom-button" value="Save New Post!">
+        </form>
+      </div>
+    </div>
+    <div id="search-results">
+      <% for(var i=data.length-1; i>-1; i--) {%>
+      <a href="/post/<%= data[i].id%>" class="black-text">
+        <p>
+          <form method="get" action="/posts/<%= data[i].id%>/edit">
+            <input type="submit" class="custom-button2" value="Edit">
+          </form>
+          <form method="POST" action="/posts/<%= data[i].id%>?_method=DELETE">
+            <input type="submit" class="custom-button2" name="_method" value="DELETE">
+          </form>
+          <h2 style="background: #928fbd; padding: 20px; margin: 20px 0 0 0;"><%= data[i].title%></h2>
+          <div class="results"><%= data[i].entry%></div>
+        </p>
+        </a>
+      <% } %>
+    </div>
+  </div>
+  <footer>
+    <% include ../partials/footer %>
+  </footer>
+  </body>
+</html>
